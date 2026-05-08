@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: library-management
+    runtime: node
+    plan: free
+    buildCommand: mkdir -p db && npx prisma generate && npx prisma db push && npx tsx prisma/seed.ts && npm run build
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        value: "file:./db/custom.db"
+      - key: NODE_ENV
+        value: production

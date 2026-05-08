@@ -1,0 +1,54 @@
+# dependencies
+node_modules
+
+# next.js
+.next/
+out/
+
+# production
+build/
+
+# database (fresh created on deployment)
+db/*.db
+
+# misc
+.DS_Store
+*.pem
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.log
+
+# environment secrets
+.env
+.env.local
+.env.production
+.env.staging
+
+# but KEEP the example
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# sandbox internal files (not needed for deployment)
+.claude
+.z-ai-config
+.zscripts/
+skills/
+test/
+prompt
+download/
+upload/
+worklog.md
+Caddyfile
+start-dev.sh
+examples/
+mini-services/
