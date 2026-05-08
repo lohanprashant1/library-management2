@@ -2,21 +2,22 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Star, Send, CheckCircle2, Loader2, MessageSquareText } from 'lucide-react';
+import { BookPlus, Send, CheckCircle2, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 
-export default function FeedbackPage() {
+export default function SuggestBookPage() {
   const [form, setForm] = useState({
-    name: '',
+    bookTitle: '',
+    authorName: '',
+    reason: '',
+    yourName: '',
     email: '',
-    message: '',
+    phone: '',
   });
-  const [rating, setRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -27,24 +28,23 @@ export default function FeedbackPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.message || rating === 0) {
-      setError('Please fill in all fields and provide a rating.');
+    if (!form.bookTitle || !form.yourName || !form.email) {
+      setError('Please fill in all required fields.');
       return;
     }
     setError('');
     setSubmitting(true);
     try {
-      const res = await fetch('/api/feedback', {
+      const res = await fetch('/api/suggestions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, rating }),
+        body: JSON.stringify(form),
       });
       if (res.ok) {
         setSuccess(true);
-        setForm({ name: '', email: '', message: '' });
-        setRating(0);
+        setForm({ bookTitle: '', authorName: '', reason: '', yourName: '', email: '', phone: '' });
       } else {
-        setError('Failed to submit feedback. Please try again.');
+        setError('Failed to submit suggestion. Please try again.');
       }
     } catch {
       setError('Network error. Please try again.');
@@ -52,8 +52,6 @@ export default function FeedbackPage() {
       setSubmitting(false);
     }
   };
-
-  const ratingLabels = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
 
   if (success) {
     return (
@@ -67,15 +65,15 @@ export default function FeedbackPage() {
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
             <CheckCircle2 className="h-9 w-9" />
           </div>
-          <h2 className="text-xl font-bold text-[#161922] sm:text-2xl">Thank You!</h2>
+          <h2 className="text-xl font-bold text-[#161922] sm:text-2xl">Suggestion Submitted!</h2>
           <p className="mt-2 max-w-sm text-center text-sm text-[#161922]/50">
-            Your feedback has been submitted successfully. We appreciate your input to help us improve our services.
+            Thank you for suggesting a book. Our team will review your suggestion and get back to you.
           </p>
           <Button
             onClick={() => setSuccess(false)}
             className="mt-6 bg-[#C62729] text-white shadow-sm hover:bg-[#B32023]"
           >
-            Submit More Feedback
+            Suggest Another Book
           </Button>
         </motion.div>
       </div>
@@ -91,10 +89,10 @@ export default function FeedbackPage() {
         transition={{ duration: 0.5 }}
         className="mb-8 text-center"
       >
-        <MessageSquareText className="mx-auto mb-3 h-10 w-10 text-[#C62729]" />
-        <h1 className="text-2xl font-bold text-[#161922] sm:text-3xl">Share Your Feedback</h1>
+        <BookPlus className="mx-auto mb-3 h-10 w-10 text-[#C62729]" />
+        <h1 className="text-2xl font-bold text-[#161922] sm:text-3xl">Suggest a Book</h1>
         <p className="mt-2 text-sm text-[#161922]/50">
-          We value your opinion. Help us serve you better by sharing your experience
+          Help us grow our collection by suggesting books you&apos;d like to see in the library
         </p>
       </motion.div>
 
@@ -107,51 +105,65 @@ export default function FeedbackPage() {
         <Card className="border-slate-100 shadow-sm">
           <CardContent className="p-5 sm:p-8">
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Star Rating */}
+              {/* Book Title */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-[#161922]">
-                  Your Rating <span className="text-[#C62729]">*</span>
+                <Label htmlFor="bookTitle" className="text-sm font-medium text-[#161922]">
+                  Book Title <span className="text-[#C62729]">*</span>
                 </Label>
-                <div className="flex items-center gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setRating(star)}
-                      onMouseEnter={() => setHoverRating(star)}
-                      onMouseLeave={() => setHoverRating(0)}
-                      className="transition-transform hover:scale-110 focus:outline-none"
-                      aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
-                    >
-                      <Star
-                        className={`h-8 w-8 transition-colors ${
-                          star <= (hoverRating || rating)
-                            ? 'fill-[#CB8B00] text-[#CB8B00]'
-                            : 'fill-slate-100 text-slate-300'
-                        }`}
-                      />
-                    </button>
-                  ))}
-                  {(hoverRating || rating) > 0 && (
-                    <span className="ml-2 text-sm font-medium text-[#CB8B00]">
-                      {ratingLabels[hoverRating || rating]}
-                    </span>
-                  )}
-                </div>
+                <Input
+                  id="bookTitle"
+                  name="bookTitle"
+                  value={form.bookTitle}
+                  onChange={handleChange}
+                  placeholder="Enter the book title"
+                  required
+                  className="border-slate-200 focus-visible:ring-[#C62729]/20 focus-visible:border-[#C62729]"
+                />
               </div>
 
-              {/* Name & Email */}
+              {/* Author Name */}
+              <div className="space-y-2">
+                <Label htmlFor="authorName" className="text-sm font-medium text-[#161922]">
+                  Author Name
+                </Label>
+                <Input
+                  id="authorName"
+                  name="authorName"
+                  value={form.authorName}
+                  onChange={handleChange}
+                  placeholder="Enter the author's name"
+                  className="border-slate-200 focus-visible:ring-[#C62729]/20 focus-visible:border-[#C62729]"
+                />
+              </div>
+
+              {/* Reason */}
+              <div className="space-y-2">
+                <Label htmlFor="reason" className="text-sm font-medium text-[#161922]">
+                  Reason for Suggestion
+                </Label>
+                <Textarea
+                  id="reason"
+                  name="reason"
+                  value={form.reason}
+                  onChange={handleChange}
+                  placeholder="Tell us why you think this book should be in our library..."
+                  rows={3}
+                  className="border-slate-200 focus-visible:ring-[#C62729]/20 focus-visible:border-[#C62729] resize-none"
+                />
+              </div>
+
+              {/* Your Details */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium text-[#161922]">
-                    Name <span className="text-[#C62729]">*</span>
+                  <Label htmlFor="yourName" className="text-sm font-medium text-[#161922]">
+                    Your Name <span className="text-[#C62729]">*</span>
                   </Label>
                   <Input
-                    id="name"
-                    name="name"
-                    value={form.name}
+                    id="yourName"
+                    name="yourName"
+                    value={form.yourName}
                     onChange={handleChange}
-                    placeholder="Enter your name"
+                    placeholder="Enter your full name"
                     required
                     className="border-slate-200 focus-visible:ring-[#C62729]/20 focus-visible:border-[#C62729]"
                   />
@@ -173,20 +185,19 @@ export default function FeedbackPage() {
                 </div>
               </div>
 
-              {/* Message */}
+              {/* Phone */}
               <div className="space-y-2">
-                <Label htmlFor="message" className="text-sm font-medium text-[#161922]">
-                  Your Message <span className="text-[#C62729]">*</span>
+                <Label htmlFor="phone" className="text-sm font-medium text-[#161922]">
+                  Phone Number
                 </Label>
-                <Textarea
-                  id="message"
-                  name="message"
-                  value={form.message}
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={form.phone}
                   onChange={handleChange}
-                  placeholder="Tell us about your experience..."
-                  rows={4}
-                  required
-                  className="border-slate-200 focus-visible:ring-[#C62729]/20 focus-visible:border-[#C62729] resize-none"
+                  placeholder="Enter your phone number"
+                  className="border-slate-200 focus-visible:ring-[#C62729]/20 focus-visible:border-[#C62729]"
                 />
               </div>
 
@@ -209,7 +220,7 @@ export default function FeedbackPage() {
                 ) : (
                   <>
                     <Send className="mr-2 h-4 w-4" />
-                    Submit Feedback
+                    Submit Suggestion
                   </>
                 )}
               </Button>
