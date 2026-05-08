@@ -1,0 +1,388 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Settings {
+  id              String   @id @default(cuid())
+  libraryName     String   @default("City Library")
+  address         String   @default("")
+  phone           String   @default("")
+  email           String   @default("")
+  aboutText       String   @default("Welcome to our library. We offer a wide range of books and resources for all ages.")
+  maxBooksPerMember Int    @default(5)
+  maxLoanDays     Int      @default(14)
+  finePerDay      Float    @default(1.0)
+  openingHours    String   @default("Mon-Sat: 9:00 AM - 8:00 PM")
+  membershipFee   Float    @default(0.0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  description String @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  books     Book[]
+}
+
+model Author {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  bio       String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  books     Book[]
+}
+
+model Book {
+  id          String   @id @default(cuid())
+  title       String
+  isbn        String   @default("")
+  description String   @default("")
+  publisher   String   @default("")
+  publishYear Int      @default(2024)
+  totalCopies Int      @default(1)
+  availableCopies Int  @default(1)
+  categoryId  String
+  authorId    String
+  coverImage  String   @default("")
+  shelfLocation String @default("")
+  addedAt     DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  category    Category @relation(fields: [categoryId], references: [id])
+  author      Author   @relation(fields: [authorId], references: [id])
+  transactions Transaction[]
+}
+
+model Member {
+  id            String   @id @default(cuid())
+  memberId      String   @unique
+  name          String
+  email         String   @unique
+  phone         String
+  address       String   @default("")
+  dateOfBirth   String   @default("")
+  gender        String   @default("Other")
+  occupation    String   @default("")
+  photo         String   @default("")
+  status        String   @default("Active")
+  membershipDate DateTime @default(now())
+  expiryDate    DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  transactions  Transaction[]
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  bookId      String
+  memberId    String
+  issueDate   DateTime @default(now())
+  dueDate     DateTime
+  returnDate  DateTime?
+  status      String   @default("Issued")
+  fineAmount  Float    @default(0.0)
+  remarks     String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  book        Book     @relation(fields: [bookId], references: [id])
+  member      Member   @relation(fields: [memberId], references: [id])
+}
+
+// ─── EXISTING MODELS ─────────────────────────────────────────────────
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  eventDate   String   @default("")
+  eventTime   String   @default("")
+  venue       String   @default("")
+  type        String   @default("Event")
+  status      String   @default("Upcoming")
+  image       String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model EBook {
+  id          String   @id @default(cuid())
+  title       String
+  author      String   @default("")
+  description String   @default("")
+  category    String   @default("")
+  isbn        String   @default("")
+  publisher   String   @default("")
+  fileUrl     String   @default("")
+  fileSize    String   @default("")
+  format      String   @default("PDF")
+  accessLevel String   @default("All")
+  addedAt     DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  category  String   @default("General")
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Staff {
+  id          String   @id @default(cuid())
+  name        String
+  designation String   @default("")
+  department  String   @default("")
+  email       String   @default("")
+  phone       String   @default("")
+  photo       String   @default("")
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  icon        String   @default("Library")
+  fee         Float    @default(0)
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Suggestion {
+  id        String   @id @default(cuid())
+  title     String
+  author    String   @default("")
+  reason    String   @default("")
+  name      String
+  email     String
+  phone     String   @default("")
+  status    String   @default("Pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @default("")
+  rating    Int      @default(5)
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── ACADEMIC LIBRARY FEATURES ──────────────────────────────────────
+
+model Donor {
+  id            String   @id @default(cuid())
+  name          String
+  designation   String   @default("")
+  organization  String   @default("")
+  amount        Float    @default(0)
+  year          String   @default("")
+  description   String   @default("")
+  photo         String   @default("")
+  donorType     String   @default("Individual")
+  isFeatured    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model NewArrival {
+  id            String   @id @default(cuid())
+  title         String
+  author        String   @default("")
+  category      String   @default("")
+  itemType      String   @default("Book")
+  description   String   @default("")
+  coverImage    String   @default("")
+  arrivalDate   String   @default("")
+  featured      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model EResource {
+  id            String   @id @default(cuid())
+  name          String
+  url           String   @default("")
+  description   String   @default("")
+  category      String   @default("Database")
+  accessType    String   @default("IP Based")
+  publisher     String   @default("")
+  isActive      Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Notice {
+  id            String   @id @default(cuid())
+  title         String
+  content       String   @default("")
+  type          String   @default("General")
+  priority      String   @default("Normal")
+  publishDate   String   @default("")
+  expiryDate    String   @default("")
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model AskLibrarian {
+  id            String   @id @default(cuid())
+  question      String
+  answer        String   @default("")
+  name          String   @default("")
+  email         String   @default("")
+  category      String   @default("General")
+  status        String   @default("Pending")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model FacultyPublication {
+  id            String   @id @default(cuid())
+  title         String
+  author        String   @default("")
+  department    String   @default("")
+  journal       String   @default("")
+  year          String   @default("")
+  doi           String   @default("")
+  abstract      String   @default("")
+  pubType       String   @default("Journal")
+  url           String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model PastPaper {
+  id            String   @id @default(cuid())
+  title         String
+  course        String   @default("")
+  courseCode    String   @default("")
+  department    String   @default("")
+  year          String   @default("")
+  semester      String   @default("")
+  fileUrl       String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model LibraryRule {
+  id            String   @id @default(cuid())
+  title         String
+  content       String   @default("")
+  category      String   @default("General")
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model PhotoGallery {
+  id            String   @id @default(cuid())
+  title         String
+  description   String   @default("")
+  image         String   @default("")
+  event         String   @default("")
+  date          String   @default("")
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Newsletter {
+  id            String   @id @default(cuid())
+  title         String
+  description   String   @default("")
+  fileUrl       String   @default("")
+  issue         String   @default("")
+  date          String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Committee {
+  id            String   @id @default(cuid())
+  name          String
+  designation   String   @default("")
+  department    String   @default("")
+  role          String   @default("Member")
+  email         String   @default("")
+  phone         String   @default("")
+  photo         String   @default("")
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model ResearchGuide {
+  id            String   @id @default(cuid())
+  title         String
+  description   String   @default("")
+  category      String   @default("General")
+  content       String   @default("")
+  author        String   @default("")
+  fileUrl       String   @default("")
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model CASAlert {
+  id            String   @id @default(cuid())
+  title         String
+  description   String   @default("")
+  category      String   @default("New Arrivals")
+  alertDate     String   @default("")
+  source        String   @default("")
+  url           String   @default("")
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model ILLRequest {
+  id            String   @id @default(cuid())
+  title         String
+  author        String   @default("")
+  journal       String   @default("")
+  year          String   @default("")
+  requesterName String
+  requesterEmail String
+  department    String   @default("")
+  status        String   @default("Pending")
+  remarks       String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
